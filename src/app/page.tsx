@@ -1,101 +1,483 @@
-import Image from "next/image";
+"use client";
+import localStoreMidias from "../../models/localStoreMidias";
+import Midia, { temporadas, horas } from "../../models/Midia";
+import Filme from "../../models/Filme";
+import Serie from "../../models/Serie";
+import { useEffect, useRef, useState } from "react";
+import  "../app/globals.css";
 
-export default function Home() {
+const Home: React.FC = () => {
+  const loc = new localStoreMidias();
+
+  const midiaRef = useRef<HTMLSelectElement>(null);
+  const horaRef = useRef<HTMLSelectElement>(null);
+  const minutosRef = useRef<HTMLSelectElement>(null);
+  const qtTemporadasRef = useRef<HTMLSelectElement>(null);
+  const [emAlteracao, setEmAlteracao] = useState<boolean>(false);
+  const [globalsAltere, setGlobalsAltere] = useState<Midia>();
+
+  const gerarNum = (inicio: number, fim: number, elemento: string) => {
+    const selecion = document.getElementById(elemento);
+
+    const ele1 = document.createElement('option');
+    ele1.value = " ";
+    ele1.textContent = " ";
+
+    selecion?.append(ele1);
+    
+    for (let i = inicio; i <= fim; i++) {
+        const option = document.createElement('option');
+        option.value = i.toString();
+        option.textContent = i.toString();
+        if (selecion)
+        selecion.appendChild(option);
+      
+    }
+  }
+
+  const anoAtual = new Date().getFullYear()+100; 
+
+  const verificar = () => {
+    const midia = midiaRef.current;
+    const hora = horaRef.current;
+    const minutos = minutosRef.current;
+    const qtTemporadas = qtTemporadasRef.current;
+
+    if (midia && hora && minutos && qtTemporadas) {
+      const m = midia.value;
+      if (m === 'filme') {
+        qtTemporadas.style.display = 'none';
+        hora.style.display = 'block';
+        minutos.style.display = 'block';
+      } else {
+        qtTemporadas.style.display = 'block';
+        hora.style.display = 'none';
+        minutos.style.display = 'none';
+      }
+    }
+  };
+
+  useEffect(() => {
+    const midia = midiaRef.current;
+
+    if (midia) {
+      midia.addEventListener('change', verificar);
+    }
+
+    verificar();
+    gerarNum(1800, anoAtual, 'ano');
+    gerarNum(0, 42, 'horas');
+    gerarNum(0, 59, 'minutos');
+    gerarNum(1, 100, 'temporadas');
+    atualizarLista();
+    Limpar()
+
+  }, []);
+
+
+
+  const addMidiaF = () => {
+    const nome = document.getElementById('nome') as HTMLInputElement;
+    const desc = document.getElementById('descricao') as HTMLInputElement;
+    const ano = document.getElementById('ano') as HTMLInputElement;
+    const genero = document.getElementById('genero') as HTMLInputElement;
+
+    const midia = midiaRef.current;
+    const hora = horaRef.current;
+    const minutos = minutosRef.current;
+    const qtTemporadas = qtTemporadasRef.current;
+
+    if (midia && nome && desc && ano && genero) {
+      if (midia.value === 'filme') {
+
+        const midi: Filme = new Filme(nome.value, desc.value, genero.value,
+        parseInt(ano.value),new horas(parseInt(hora?.value || "0"), parseInt(minutos?.value || "0")));
+
+
+        loc.addMidia(midi);
+        criarElemento(midi);
+        
+
+      } 
+      else {
+        const midi: Serie = new Serie(nome.value,desc.value,genero.value,
+          parseInt(ano.value),new temporadas(parseInt(qtTemporadas?.value || "0"))
+        );
+
+
+          loc.addMidia(midi);
+          criarElemento(midi);
+
+      }
+    }
+    Limpar()
+    
+    
+  }
+  
+
+  const criarElemento = (f: Midia) =>{
+      //Elemento principal
+      const elementoMidia = document.createElement('li');
+
+      const divTipo = document.createElement('div');
+      const divDados = document.createElement('div');
+      const divBotoes = document.createElement('div');
+      const divAvaliacoes = document.createElement('div');
+      divTipo.id = 'tipo';
+      divAvaliacoes.id = 'avaliacaoDiv';
+      divBotoes.id = 'botoes';
+      divDados.id = 'dados';
+
+      //Valores
+      const titulo = document.createElement('h3');
+      const tipo = document.createElement('p');
+      const descricao = document.createElement('p');
+      const dadosMais = document.createElement('p');
+
+      titulo.id = `${f.getNome()}`;
+      titulo.textContent = f.getNome();
+      divDados.appendChild(titulo);
+
+      descricao.id = 'sinopse';
+      descricao.textContent = f.getDescricao();
+
+      dadosMais.id = 'more';
+
+      if (f instanceof Filme){
+        tipo.id = 'tipoFilme';
+        tipo.textContent = "Filme";
+        divTipo.appendChild(tipo);
+
+        dadosMais.textContent = `${f.getAno()}  ${f.getGenero()}  ${f.getDura().hora}h ${f.getDura().minuto}min`;
+        divDados.appendChild(dadosMais);
+        divDados.appendChild(descricao);
+        
+      } else if (f instanceof Serie){
+        tipo.id = 'tipoSerie';
+        tipo.textContent = 'Série';
+        divTipo.appendChild(tipo);
+
+        dadosMais.textContent = `${f.getAno()}  ${f.getGenero()}  temporadas: ${f.getDuracao().qtTempotadas}`;
+        divDados.appendChild(dadosMais);
+        divDados.appendChild(descricao);
+
+      }
+
+      //Botões
+      criarBotaoEditar(f, divBotoes);
+      criarBotaoExcluirMidia(f, divBotoes);
+      divDados.appendChild(divBotoes)
+
+      // Criação das estrelas
+      criarEstrelas(f, divAvaliacoes);
+
+      //Adicionando no li
+      elementoMidia.appendChild(divTipo)
+      elementoMidia.appendChild(divDados)
+      elementoMidia.appendChild(divAvaliacoes)
+
+      document.getElementById('midias')?.appendChild(elementoMidia)
+
+  }
+
+  const salvar = ()=>{
+    if(emAlteracao){
+      if(globalsAltere)
+      alterarMidia(globalsAltere)
+      setGlobalsAltere(undefined)
+      setEmAlteracao(false)
+      Limpar()
+    }else{
+      addMidiaF()
+
+    }
+  }
+
+  const Limpar = () => {
+    const nome = document.getElementById('nome') as HTMLInputElement;
+    const desc = document.getElementById('descricao') as HTMLInputElement;
+    const ano = document.getElementById('ano') as HTMLInputElement;
+    const genero = document.getElementById('genero') as HTMLInputElement;
+
+    const h = horaRef.current;
+    const m = horaRef.current;
+    const t = horaRef.current;
+    if(h && m) {
+      h.selectedIndex = 0;
+      m.selectedIndex = 0;
+      
+    }
+    if (t){
+      t.selectedIndex = 0;
+    }
+
+    nome.value = '';
+    desc.value = '';
+    ano.value = '';
+    genero.value='';
+
+
+  }
+
+
+  const alterarMidia = (f: Midia) => {
+    const nome = document.getElementById('nome') as HTMLInputElement;
+    const desc = document.getElementById('descricao') as HTMLInputElement;
+    const ano = document.getElementById('ano') as HTMLInputElement;
+    const genero = document.getElementById('genero') as HTMLInputElement;
+
+
+    const hora = horaRef.current;
+    const minutos = minutosRef.current;
+    const qtTemporadas = qtTemporadasRef.current;
+
+    const midias = loc.getMidiaArray();
+    const midi = midias.find(m => m.getNome() == f.getNome());
+    if (midi){ 
+      midi.setNome(nome.value);
+      midi.setAno(parseInt(ano.value));
+      midi.setDescricao(desc.value);
+      midi.setGenero(genero.value);
+
+      if(midi instanceof Filme){
+        const hor = new horas(parseInt(hora?.value || "0"),parseInt(minutos?.value || "0"))
+
+      midi.setDuracao(hor.hora,hor.minuto);
+      } else if (midi instanceof Serie){
+        midi.setDuracao((new temporadas(parseInt(qtTemporadas?.value || "0"))).qtTempotadas);
+      }
+      loc.setMidiaArray(midias)
+      console.info(midias)
+      console.info(loc.getMidiaArray())
+
+      atualizarLista();
+      return true;
+    };
+    return false;
+    
+  }
+
+  const criarBotaoExcluirMidia = (f: Midia, parentElement: HTMLElement) => {
+    const botao = document.createElement('button');
+    botao.id = 'excluirBotao'
+    botao.textContent = 'Excluir'
+
+    botao.addEventListener( 'click', () =>{
+      excluirMidia(f)
+    })
+    parentElement.appendChild(botao);
+  }
+
+  const excluirMidia = (f: Midia) => {
+    loc.setMidiaArray(loc.getMidiaArray().filter(m => m != f));
+    atualizarLista();
+  }
+
+  const editarMidia = (f: Midia) => {
+    const nome = document.getElementById('nome') as HTMLInputElement;
+    const desc = document.getElementById('descricao') as HTMLInputElement;
+    const ano = document.getElementById('ano') as HTMLInputElement;
+    const genero = document.getElementById('genero') as HTMLInputElement;
+    const midia = midiaRef.current;
+    const hora = horaRef.current;
+    const minutos = minutosRef.current;
+    const qtTemporadas = qtTemporadasRef.current;
+  
+    if (nome && desc && ano && genero && midia) {
+      nome.value = f.getNome();
+      desc.value = f.getDescricao();
+      ano.value = f.getAno().toString();
+      genero.value = f.getGenero();
+
+      verificar(); 
+      if (f instanceof Filme && hora && minutos) {
+        midia.value = 'filme';
+        hora.value = f.getDura().hora.toString();
+        minutos.value = f.getDura().minuto.toString();
+        
+      } else if (f instanceof Serie && qtTemporadas) {
+        midia.value = 'serie';
+        qtTemporadas.value = f.getDuracao().qtTempotadas.toString();
+
+      }
+    }
+    
+  
+  };
+
+  const cancelar = () =>{
+    const nome = document.getElementById('nome') as HTMLInputElement;
+    const desc = document.getElementById('descricao') as HTMLInputElement;
+    const ano = document.getElementById('ano') as HTMLInputElement;
+    const genero = document.getElementById('genero') as HTMLInputElement;
+
+    const midia = midiaRef.current;
+    const hora = horaRef.current;
+    const minutos = minutosRef.current;
+    const qtTemporadas = qtTemporadasRef.current;
+
+    if (midia && nome && desc && ano && genero) {
+      if (midia.value === 'filme') {
+        if (hora && minutos){
+        hora.selectedIndex = 0;
+        minutos.selectedIndex = 0;
+        }
+      } else {
+        if (qtTemporadas){
+          qtTemporadas.selectedIndex = 0;
+        }
+      }
+    }
+    nome.value = '';
+    desc.value = '';
+    ano.value = '';
+    genero.value='';
+  }
+
+  const criarBotaoEditar = (f: Midia, parentElement: HTMLElement) =>{
+      const botao = document.createElement('button');
+      botao.id = 'editarBotao';
+      botao.textContent = 'Editar'
+
+      botao.addEventListener('click', () =>{
+        editarMidia(f);
+        setEmAlteracao(true)
+        setGlobalsAltere(f)
+      
+      })
+
+      parentElement.appendChild(botao);
+  }
+
+  const criarEstrelas = (f: Midia, parentElement: HTMLElement) => {
+      const ava = document.createElement('div');
+      ava.id = 'avaliacao';
+    
+      for (let i = 1; i <= 5; i++) {
+        const star = document.createElement('span');
+        star.className = 'estrela';
+        star.dataset.value = i.toString();
+        star.textContent = '★';
+        star.style.cursor = 'pointer';
+        if (i<= f.getAvaliacao()){
+          star.classList.add('selected');
+        }
+        ava.appendChild(star);
+    
+        star.addEventListener('click', function () {
+          const valor = parseInt(this.dataset.value || "0");
+          const estrelas = ava.querySelectorAll('.estrela');
+    
+          estrelas.forEach((estrela) => {
+            const estrelaValor = parseInt(estrela.getAttribute('data-value') || "0");
+            
+            if (estrelaValor <= valor) {
+              estrela.classList.add('selected');
+              f.setAvaliacao(estrelaValor)
+              const midias = loc.getMidiaArray();
+              const midiaIndex = midias.findIndex((m) => m.getNome() === f.getNome());
+              if (midiaIndex !== -1) {
+                midias[midiaIndex].setAvaliacao(estrelaValor);
+                atualizarLista();
+              }
+            } else {
+              estrela.classList.remove('selected');
+            }
+          });
+
+        });
+
+        star.addEventListener('mouseover', function () {
+          const valor = parseInt(this.dataset.value || "0");
+          const estrelas = ava.querySelectorAll('.estrela');
+    
+          estrelas.forEach((estrela) => {
+            const estrelaValor = parseInt(estrela.getAttribute('data-value') || "0");
+    
+            if (estrelaValor <= valor) {
+              estrela.classList.add('up');
+            } else {
+              estrela.classList.remove('up');
+            }
+          });
+
+        });
+        star.addEventListener('mouseout', function (){
+          const estrelas = ava.querySelectorAll('.estrela');
+
+          estrelas.forEach((estrela)=>{
+            estrela.classList.remove('up');
+          })
+        })
+      }
+    
+      parentElement.appendChild(ava);
+  };
+
+  const atualizarLista = () =>{
+    loc.initializeLocalStorage()
+      const listaMidias = document.getElementById('midias');
+      if (listaMidias)
+      listaMidias.innerHTML = " ";
+        
+      loc.getMidiaArray().forEach( f => {
+          criarElemento(f);
+      } )
+  }
+
+
+  
+
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <main>
+    <div>
+      <input type="text" id="nome" name="nome" placeholder="Título da Produção" />
+      <br />
+      <input type="text" id="descricao" name="descricao" placeholder="Descrição da Produção" />
+      <br />
+      <select id="ano" name="ano"  required></select>
+      <br />
+      <input type="text" id="genero" name="genero" placeholder="Gênero da Produção" />
+      <br />
+      <select id="midia" name="midia" ref={midiaRef}>
+        <option value="serie">Série</option>
+        <option value="filme">Filme</option>
+      </select>
+      <br />
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      <select
+        id="horas"
+        name="horas"
+        style={{ display: 'none' }}
+        ref={horaRef}
+      ></select>
+
+      <select
+        id="minutos"
+        name="minutos"
+        style={{ display: 'none' }}
+        ref={minutosRef}
+      ></select>
+
+      <select
+        id="temporadas"
+        name="temporadas"
+        style={{ display: 'none' }}
+        ref={qtTemporadasRef}
+      ></select>
+
+      <button id= 'salvar' onClick={salvar}>Salvar</button>
+      <button onClick={cancelar}>Cancelar</button>
     </div>
+    <div>
+      <ul id='midias'>
+        
+      </ul>
+    </div>
+    </main>
   );
 }
+
+export default Home;
