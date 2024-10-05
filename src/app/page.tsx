@@ -103,8 +103,6 @@ const Home: React.FC = () => {
         const midi: Serie = new Serie(nome.value,desc.value,genero.value,
           parseInt(ano.value),new temporadas(parseInt(qtTemporadas?.value || "0"))
         );
-
-
           loc.addMidia(midi);
           criarElemento(midi);
 
@@ -362,7 +360,7 @@ const Home: React.FC = () => {
         star.style.cursor = 'pointer';
         if (i<= f.getAvaliacao()){
           star.classList.add('selected');
-        }
+        }  
         ava.appendChild(star);
     
         star.addEventListener('click', function () {
