@@ -30,7 +30,10 @@ main > div:first-child textarea {
   margin-bottom: 15px;
   border: 1px solid var(--input-border, #ccc);
   border-radius: 4px;
-  min-width: 97%;
+  max-width: 96%;
+  min-width: 96%;
+  max-height: 500px;
+  min-height:200px;;
 
 }
 
@@ -297,6 +300,13 @@ ul{
 
   #midias li #dados #botoes {
     margin-top: 10px;
+  }
+  main {
+    display: flex;
+    flex-direction: column;
+    
+    padding: 30px;
+    gap: 20px;
   }
 }
 
