@@ -21,10 +21,14 @@ export default class localStoreMidias {
                 this.Midia = parsedMidia.map((item: any) => {
                     if (item.duracao.hora !== undefined) {
                         const duracao = new horas(item.duracao.hora, item.duracao.minuto);
-                        return new Filme(item.titulo, item.descricao, item.genero, item.ano, duracao);
+                        const f = new Filme(item.titulo, item.descricao, item.genero, item.ano, duracao);
+                        f.setAvaliacao(item.avaliacao)
+                        return f;
                     } else if (item.duracao.qtTempotadas !== undefined) {
                         const duracao = new temporadas(item.duracao.qtTempotadas);
-                        return new Serie(item.titulo, item.descricao, item.genero, item.ano, duracao);
+                        const s = new Serie(item.titulo, item.descricao, item.genero, item.ano, duracao);
+                        s.setAvaliacao(item.avaliacao)
+                        return s;
                     }
                     return null;
                 }).filter(Boolean); 

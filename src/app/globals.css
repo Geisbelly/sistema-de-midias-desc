@@ -1,23 +1,367 @@
+/* Global Styles */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: var(--background-color, #ffffff);
+  color: var(--text-color, #000000);
+}
+
+#cancelar{
+  --button-background: #686666;
+}
+
+#cancelar:hover{
+  --button-hover: #444444;
+}
+
+#nomeGenero{
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+}
+
+main > div:first-child textarea {
+  font-family: Arial, sans-serif;
+  font-size: 16px;
+  max-width: 97%;
+  width: 97%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid var(--input-border, #ccc);
+  border-radius: 4px;
+  min-width: 97%;
+
+}
+
+#nome{
+  width: 55%;
+}
+
+#genero{
+  width: 40%;
+}
+
+#tipo{
+  display: flex;
+  flex-direction: row;
+  gap: 18px;
+  margin-bottom: 0px;
+}
+
+#seleções{
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+}
+
+#anoMidia{
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+}
 
 
+#tempoforfilme{
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+}
+
+#botoes{
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+}
+
+#descricao {
+  width: 100%;
+  height: 200px;
+  vertical-align: text-bottom;
+  overflow: auto;
+}
+
+
+#cabecalho{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+}
+
+
+main {
+  display: flex;
+  flex-direction: row;
+  
+  padding: 30px;
+  gap: 20px;
+}
+
+main > div {
+  width: 100%;
+  max-width: 800px;
+}
+
+/* Form Styles */
+main > div:first-child {
+  display: flex;
+  background-color: var(--form-background, #f0f0f0);
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+}
+
+main > div:first-child input[type="text"],
+main > div:first-child select {
+  max-width: 760px;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid var(--input-border, #ccc);
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+main > div:first-child select {
+
+  background-color: var(--select-background, #fff);
+}
+
+main > div:first-child button {
+  padding: 10px 20px;
+  margin-right: 10px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 4px;
+  background-color: var(--button-background, #007bff);
+  color: #ffffff;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+main > div:first-child button:hover {
+  background-color: var(--button-hover, #0056b3);
+}
+
+/* Media List Styles */
+#midias {
+  list-style: none;
+  padding: 0;
+}
+
+ul{
+  margin-top: 0;
+
+}
+
+#form{
+  display: flex;
+  flex-direction: column;
+  max-height: auto;
+  height: 45%;
+
+}
+
+#midias li {
+  background-color: var(--item-background, #ffffff);
+  border: 1px solid var(--item-border, #ddd);
+  border-radius: 8px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-bottom: 20px;
+  padding-top: 5px;
+  align-items: flex-start;
+}
+
+#midias li #tipo {
+  width: 75%;
+  text-align: center;
+  margin-right: 20px;
+}
+
+#midias li #tipo #tipoFilme,
+#midias li #tipo #tipoSerie {
+  max-height: 18px;
+  min-height: 18px;
+  padding: 5px 10px;
+  border-radius: 4px;
+  color: #ffffff;
+  font-weight: bold;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+  display: flex;
+}
+
+#midias li #tipo #tipoFilme {
+  background-color: #28a745;
+}
+
+#midias li #tipo #tipoSerie {
+  background-color: #6f42c1;
+}
+
+#midias li #dados {
+  flex: 1;
+}
+
+#midias li #dados h3 {
+  margin: 0 0 10px 0;
+  font-size: 20px;
+}
+
+#midias li #dados #more {
+  color: var(--text-muted, #666666);
+  margin-bottom: 18px;
+  margin-top: 1px;
+}
+
+#midias li #dados #sinopse {
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+#midias li #dados #botoes {
+  margin-top: 12px;
+
+}
+
+#midias li #dados #botoes button {
+  padding: 8px 12px;
+  margin-right: 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+#midias li #dados #botoes #editarBotao {
+  background-color: rgba(128, 178, 243, 0.932);
+  color: #ffffff;
+}
+
+#midias li #dados #botoes #editarBotao:hover {
+  background-color: rgb(47, 128, 235);
+}
+
+#midias li #dados #botoes #excluirBotao {
+  background-color: #dc3545;
+  color: #ffffff;
+}
+
+#midias li #dados #botoes #excluirBotao:hover {
+  background-color: #c82333;
+}
+
+/* Star Rating Styles */
+#avaliacao {
+  display: flex;
+  align-items: center;
+}
+
+#avaliacaoDiv {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}
 
 .estrela {
   font-size: 24px;
-  color: #ccc; 
-
+  color: #ccc;
+  transition: color 0.2s;
 }
+
 .estrela.up,
-.estrela.selected{
+.estrela.selected {
   color: gold;
-   
 }
 
-
-.estrela:hover,
 .estrela:hover {
   color: gold;
+  transform: scale(1.1);
 }
 
-:root{
+/* Responsive Design */
+@media (max-width: 600px) {
+  #midias li {
+    flex-direction: column;
+  }
+
+  #midias li #tipo {
+    margin-bottom: 10px;
+    margin-right: 0;
+  }
+
+  #midias li #dados #botoes {
+    margin-top: 10px;
+  }
+}
+
+/* Light/Dark Mode */
+:root {
   color-scheme: light dark;
 }
+
+@media (prefers-color-scheme: dark) {
+  body {
+    --background-color: #121212;
+    --text-color: #e0e0e0;
+  }
+
+  main > div:first-child {
+    --form-background: #1e1e1e;
+  }
+
+  main > div:first-child input[type="text"],
+  main > div:first-child select {
+    background-color: #2c2c2c;
+    border-color: #444;
+    color: #e0e0e0;
+  }
+
+  main > div:first-child textarea {
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    background-color: #2c2c2c;
+    border-color: #444;
+    color: #e0e0e0;
+    max-width: 96%;
+    min-width: 96%;
+    max-height: 500px;
+    min-height:200px;;
+  }
+
+  main > div:first-child select {
+    --select-background: #2c2c2c;
+  }
+
+  main > div:first-child button {
+    --button-background: #0d6efd;
+  }
+
+  main > div:first-child button:hover {
+    --button-hover: #0b5ed7;
+  }
+
+  #cancelar{
+    --button-background: #686666;
+  }
+  
+  #cancelar:hover{
+    --button-hover: #444444;
+  }
+
+  #midias li {
+    --item-background: #1e1e1e;
+    --item-border: #333;
+  }
+
+  #midias li #dados #more {
+    --text-muted: #aaaaaa;
+  }
+}
+
+

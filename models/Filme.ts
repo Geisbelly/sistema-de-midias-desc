@@ -19,8 +19,8 @@ export default class Filme extends Midia{
     }
 
     setDuracao(m: number, h: number){
-        this.duracao.hora = h;
-        this.duracao.minuto =m;
+        this.duracao.hora = m;
+        this.duracao.minuto =h;
     }
 
     getMidia(): { "nome": string; "descricao": string; "genero": string; "ano": number; "avaliacao": number; "duracao":{"hora":number; "minuto":number} } {

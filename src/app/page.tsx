@@ -1,10 +1,12 @@
 "use client";
+
 import localStoreMidias from "../../models/localStoreMidias";
 import Midia, { temporadas, horas } from "../../models/Midia";
 import Filme from "../../models/Filme";
 import Serie from "../../models/Serie";
 import { useEffect, useRef, useState } from "react";
 import  "../app/globals.css";
+
 
 const Home: React.FC = () => {
   const loc = new localStoreMidias();
@@ -15,27 +17,66 @@ const Home: React.FC = () => {
   const qtTemporadasRef = useRef<HTMLSelectElement>(null);
   const [emAlteracao, setEmAlteracao] = useState<boolean>(false);
   const [globalsAltere, setGlobalsAltere] = useState<Midia>();
+  const anoAtual = new Date().getFullYear()+100; 
 
-  const gerarNum = (inicio: number, fim: number, elemento: string) => {
-    const selecion = document.getElementById(elemento);
 
+  const salvar = () =>{
+    if(emAlteracao){
+      if(globalsAltere)
+      alterarMidia(globalsAltere)
+      setGlobalsAltere(undefined)
+      setEmAlteracao(false)
+      Limpar()
+    }else{
+      addMidiaF()
+
+    }
+  }
+
+
+  useEffect(() => {
+    const midia = midiaRef.current;
+
+    if (midia) {
+      midia.addEventListener('change', verificar);
+    }
+
+    verificar();
+    gerarNum(1800, anoAtual, 'ano','Ano');
+    gerarNum(0, 152, 'horas','Hora(s)');
+    gerarNum(0, 59, 'minutos','Minutos');
+    gerarNum(1, 100, 'temporadas','Temporadas');
+    atualizarLista();
+    Limpar()
+
+  }, []);
+
+
+
+  const gerarNum = (inicio: number, fim: number, elemento: string, textPlace: string) => {
+    const selecion = document.getElementById(elemento) as HTMLSelectElement;
+
+    // Criação do placeholder como uma opção não selecionável
     const ele1 = document.createElement('option');
-    ele1.value = " ";
-    ele1.textContent = " ";
-
+    ele1.value = "";
+    ele1.textContent = textPlace;  // Define o texto do placeholder
+    ele1.disabled = true;            // Impede que o placeholder seja selecionado
+    ele1.selected = true;            // Mostra o placeholder como a opção padrão
+    ele1.hidden = true;              // Esconde o placeholder nas opções disponíveis
     selecion?.append(ele1);
     
     for (let i = inicio; i <= fim; i++) {
         const option = document.createElement('option');
         option.value = i.toString();
         option.textContent = i.toString();
+        option.id = i+" "+elemento
         if (selecion)
         selecion.appendChild(option);
       
     }
   }
 
-  const anoAtual = new Date().getFullYear()+100; 
+
 
   const verificar = () => {
     const midia = midiaRef.current;
@@ -56,23 +97,6 @@ const Home: React.FC = () => {
       }
     }
   };
-
-  useEffect(() => {
-    const midia = midiaRef.current;
-
-    if (midia) {
-      midia.addEventListener('change', verificar);
-    }
-
-    verificar();
-    gerarNum(1800, anoAtual, 'ano');
-    gerarNum(0, 42, 'horas');
-    gerarNum(0, 59, 'minutos');
-    gerarNum(1, 100, 'temporadas');
-    atualizarLista();
-    Limpar()
-
-  }, []);
 
 
 
@@ -120,12 +144,14 @@ const Home: React.FC = () => {
 
       const divTipo = document.createElement('div');
       const divDados = document.createElement('div');
+      const divCabecalho = document.createElement('div');
       const divBotoes = document.createElement('div');
       const divAvaliacoes = document.createElement('div');
       divTipo.id = 'tipo';
       divAvaliacoes.id = 'avaliacaoDiv';
       divBotoes.id = 'botoes';
       divDados.id = 'dados';
+      divCabecalho.id = 'cabecalho'
 
       //Valores
       const titulo = document.createElement('h3');
@@ -135,7 +161,7 @@ const Home: React.FC = () => {
 
       titulo.id = `${f.getNome()}`;
       titulo.textContent = f.getNome();
-      divDados.appendChild(titulo);
+      
 
       descricao.id = 'sinopse';
       descricao.textContent = f.getDescricao();
@@ -147,7 +173,7 @@ const Home: React.FC = () => {
         tipo.textContent = "Filme";
         divTipo.appendChild(tipo);
 
-        dadosMais.textContent = `${f.getAno()}  ${f.getGenero()}  ${f.getDura().hora}h ${f.getDura().minuto}min`;
+        dadosMais.textContent = `${f.getAno()}   |    ${f.getGenero()}    |    ${f.getDura().hora}h ${f.getDura().minuto}min`;
         divDados.appendChild(dadosMais);
         divDados.appendChild(descricao);
         
@@ -156,11 +182,12 @@ const Home: React.FC = () => {
         tipo.textContent = 'Série';
         divTipo.appendChild(tipo);
 
-        dadosMais.textContent = `${f.getAno()}  ${f.getGenero()}  temporadas: ${f.getDuracao().qtTempotadas}`;
+        dadosMais.textContent = `${f.getAno()}    |    ${f.getGenero()}   |    temporadas: ${f.getDuracao().qtTempotadas}`;
         divDados.appendChild(dadosMais);
         divDados.appendChild(descricao);
 
       }
+      divTipo.appendChild(titulo);
 
       //Botões
       criarBotaoEditar(f, divBotoes);
@@ -171,36 +198,27 @@ const Home: React.FC = () => {
       criarEstrelas(f, divAvaliacoes);
 
       //Adicionando no li
-      elementoMidia.appendChild(divTipo)
+      divCabecalho.appendChild(divTipo)
+      divCabecalho.appendChild(divAvaliacoes)
+      elementoMidia.appendChild(divCabecalho)
       elementoMidia.appendChild(divDados)
-      elementoMidia.appendChild(divAvaliacoes)
+
 
       document.getElementById('midias')?.appendChild(elementoMidia)
 
   }
 
-  const salvar = ()=>{
-    if(emAlteracao){
-      if(globalsAltere)
-      alterarMidia(globalsAltere)
-      setGlobalsAltere(undefined)
-      setEmAlteracao(false)
-      Limpar()
-    }else{
-      addMidiaF()
 
-    }
-  }
 
   const Limpar = () => {
     const nome = document.getElementById('nome') as HTMLInputElement;
     const desc = document.getElementById('descricao') as HTMLInputElement;
-    const ano = document.getElementById('ano') as HTMLInputElement;
+    const ano = document.getElementById('ano') as HTMLSelectElement;
     const genero = document.getElementById('genero') as HTMLInputElement;
 
     const h = horaRef.current;
-    const m = horaRef.current;
-    const t = horaRef.current;
+    const m = minutosRef.current;
+    const t = qtTemporadasRef.current;
     if(h && m) {
       h.selectedIndex = 0;
       m.selectedIndex = 0;
@@ -212,8 +230,8 @@ const Home: React.FC = () => {
 
     nome.value = '';
     desc.value = '';
-    ano.value = '';
-    genero.value='';
+    ano.selectedIndex = 0;
+    genero.value ='';
 
 
   }
@@ -222,7 +240,7 @@ const Home: React.FC = () => {
   const alterarMidia = (f: Midia) => {
     const nome = document.getElementById('nome') as HTMLInputElement;
     const desc = document.getElementById('descricao') as HTMLInputElement;
-    const ano = document.getElementById('ano') as HTMLInputElement;
+    const ano = document.getElementById('ano') as HTMLSelectElement;
     const genero = document.getElementById('genero') as HTMLInputElement;
 
 
@@ -256,6 +274,7 @@ const Home: React.FC = () => {
     
   }
 
+
   const criarBotaoExcluirMidia = (f: Midia, parentElement: HTMLElement) => {
     const botao = document.createElement('button');
     botao.id = 'excluirBotao'
@@ -267,16 +286,18 @@ const Home: React.FC = () => {
     parentElement.appendChild(botao);
   }
 
+
   const excluirMidia = (f: Midia) => {
     loc.setMidiaArray(loc.getMidiaArray().filter(m => m != f));
     atualizarLista();
   }
 
+
   const editarMidia = (f: Midia) => {
     const nome = document.getElementById('nome') as HTMLInputElement;
     const desc = document.getElementById('descricao') as HTMLInputElement;
-    const ano = document.getElementById('ano') as HTMLInputElement;
-    const genero = document.getElementById('genero') as HTMLInputElement;
+    const ano = document.getElementById('ano') as HTMLSelectElement;
+    const genero = document.getElementById('genero') as HTMLSelectElement;
     const midia = midiaRef.current;
     const hora = horaRef.current;
     const minutos = minutosRef.current;
@@ -285,7 +306,7 @@ const Home: React.FC = () => {
     if (nome && desc && ano && genero && midia) {
       nome.value = f.getNome();
       desc.value = f.getDescricao();
-      ano.value = f.getAno().toString();
+      ano.value = f.getAno()+"";
       genero.value = f.getGenero();
 
       verificar(); 
@@ -304,34 +325,6 @@ const Home: React.FC = () => {
   
   };
 
-  const cancelar = () =>{
-    const nome = document.getElementById('nome') as HTMLInputElement;
-    const desc = document.getElementById('descricao') as HTMLInputElement;
-    const ano = document.getElementById('ano') as HTMLInputElement;
-    const genero = document.getElementById('genero') as HTMLInputElement;
-
-    const midia = midiaRef.current;
-    const hora = horaRef.current;
-    const minutos = minutosRef.current;
-    const qtTemporadas = qtTemporadasRef.current;
-
-    if (midia && nome && desc && ano && genero) {
-      if (midia.value === 'filme') {
-        if (hora && minutos){
-        hora.selectedIndex = 0;
-        minutos.selectedIndex = 0;
-        }
-      } else {
-        if (qtTemporadas){
-          qtTemporadas.selectedIndex = 0;
-        }
-      }
-    }
-    nome.value = '';
-    desc.value = '';
-    ano.value = '';
-    genero.value='';
-  }
 
   const criarBotaoEditar = (f: Midia, parentElement: HTMLElement) =>{
       const botao = document.createElement('button');
@@ -339,14 +332,17 @@ const Home: React.FC = () => {
       botao.textContent = 'Editar'
 
       botao.addEventListener('click', () =>{
+       
         editarMidia(f);
         setEmAlteracao(true)
         setGlobalsAltere(f)
+        verificar()
       
       })
 
       parentElement.appendChild(botao);
   }
+
 
   const criarEstrelas = (f: Midia, parentElement: HTMLElement) => {
       const ava = document.createElement('div');
@@ -362,7 +358,7 @@ const Home: React.FC = () => {
           star.classList.add('selected');
         }  
         ava.appendChild(star);
-    
+        
         star.addEventListener('click', function () {
           const valor = parseInt(this.dataset.value || "0");
           const estrelas = ava.querySelectorAll('.estrela');
@@ -408,10 +404,18 @@ const Home: React.FC = () => {
             estrela.classList.remove('up');
           })
         })
+
+        
+
       }
+
+       
+        
+       
     
       parentElement.appendChild(ava);
   };
+  
 
   const atualizarLista = () =>{
     loc.initializeLocalStorage()
@@ -421,30 +425,30 @@ const Home: React.FC = () => {
         
       loc.getMidiaArray().forEach( f => {
           criarElemento(f);
+
       } )
   }
 
 
-  
-
 
   return (
     <main>
-    <div>
+    <div id="form">
+      <div id="nomeGenero">
       <input type="text" id="nome" name="nome" placeholder="Título da Produção" />
-      <br />
-      <input type="text" id="descricao" name="descricao" placeholder="Descrição da Produção" />
-      <br />
-      <select id="ano" name="ano"  required></select>
-      <br />
       <input type="text" id="genero" name="genero" placeholder="Gênero da Produção" />
-      <br />
+      </div>
+
+      <div id="seleções">
+      <div id="anoMidia">
+      <select id="ano" name="ano"  required></select>
       <select id="midia" name="midia" ref={midiaRef}>
         <option value="serie">Série</option>
         <option value="filme">Filme</option>
       </select>
-      <br />
+      </div>
 
+      <div id='tempoforfilme'>
       <select
         id="horas"
         name="horas"
@@ -458,16 +462,24 @@ const Home: React.FC = () => {
         style={{ display: 'none' }}
         ref={minutosRef}
       ></select>
+      </div>
 
+      <div id='tempoforserie'>
       <select
         id="temporadas"
         name="temporadas"
         style={{ display: 'none' }}
         ref={qtTemporadasRef}
       ></select>
+      </div>
+      </div>
 
+      <textarea id="descricao" name="descricao" placeholder="Descrição da Produção" />
+
+      <div id="botoes">
       <button id= 'salvar' onClick={salvar}>Salvar</button>
-      <button onClick={cancelar}>Cancelar</button>
+      <button onClick={Limpar} id="cancelar">Cancelar</button>
+      </div>
     </div>
     <div>
       <ul id='midias'>
@@ -477,5 +489,7 @@ const Home: React.FC = () => {
     </main>
   );
 }
+
+
 
 export default Home;
