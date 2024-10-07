@@ -7,6 +7,10 @@ body {
   color: var(--text-color, #000000);
 }
 
+h3{
+  font-size: 20px;
+  margin-top: 3px;
+}
 #cancelar{
   --button-background: #686666;
 }
@@ -162,6 +166,7 @@ ul{
   flex-direction: column;
   max-height: auto;
   height: 45%;
+  text-align: center;
 
 }
 
@@ -289,13 +294,23 @@ ul{
 
 /* Responsive Design */
 @media (max-width: 600px) {
+  #minutos, #horas, #ano, #midia{
+    width: 50%;
+  }
+
+  #temporadas{
+    width: 100%;
+  }
   #midias li {
     flex-direction: column;
   }
 
   #midias li #tipo {
-    margin-bottom: 10px;
+    display: flex;
+    align-content: center;
+    margin-bottom: 0px;
     margin-right: 0;
+    align-items: baseline;
   }
 
   #midias li #dados #botoes {
@@ -312,6 +327,7 @@ ul{
   #seleções{
     display: flex;
     flex-direction: column;
+    gap: 0px;
 
   }
 }
